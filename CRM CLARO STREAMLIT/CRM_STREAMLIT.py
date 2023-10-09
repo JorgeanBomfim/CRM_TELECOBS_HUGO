@@ -224,15 +224,15 @@ def carregar_base_gevenue():
     arquivos = glob.glob(caminho + "/*.dat")
 
     header_gevenue = ["SENHA","AGENCIA","NOME","CPF/CNPJ","TIPO_PESSOA","SCORE_DEVEDOR","DATA_AGENDA","HORA_AGENDA","VLR_NET_TV_VIRTUA","VLR_NET_FONE","VLR_CLR_MOVEL","VLR_CLR_TV",
-                    "VLR_CLR_FIXO","VLR_TOTAL","AGING","EMAIL","CONTRATO",
-                    "TIPO_TELEFONE","DDI","DDD","TELEFONE","RAMAL",
-                    "TIPO_TELEFONE.1","DDI.1","DDD.1","TELEFONE.1","RAMAL.1",
-                            "TIPO_TELEFONE.2","DDI.2","DDD.2","TELEFONE.2","RAMAL.2",
-                            "TIPO_TELEFONE.3","DDI.3","DDD.3","TELEFONE.3","RAMAL.3",
-                            "TIPO_TELEFONE.4","DDI.4","DDD.4","TELEFONE.4","RAMAL.4",
-                            "TIPO_TELEFONE.5","DDI.5","DDD.5","TELEFONE.5","RAMAL.5",
-                            "TIPO_TELEFONE.6","DDI.6","DDD.6","TELEFONE.6","RAMAL.6",
-                            "TIPO_TELEFONE.7","DDI.7","DDD.7","TELEFONE.7","RAMAL.7"]
+                  "VLR_CLR_FIXO","VLR_CLR_TVEXPURGO","VLR_CLR_OI", "VLR_TOTAL","AGING","EMAIL","CONTRATO",
+                  "TIPO_TELEFONE","DDI","DDD","TELEFONE","RAMAL",
+                  "TIPO_TELEFONE.1","DDI.1","DDD.1","TELEFONE.1","RAMAL.1",
+                      	"TIPO_TELEFONE.2","DDI.2","DDD.2","TELEFONE.2","RAMAL.2",
+                        "TIPO_TELEFONE.3","DDI.3","DDD.3","TELEFONE.3","RAMAL.3",
+                        "TIPO_TELEFONE.4","DDI.4","DDD.4","TELEFONE.4","RAMAL.4",
+                        "TIPO_TELEFONE.5","DDI.5","DDD.5","TELEFONE.5","RAMAL.5",
+                        "TIPO_TELEFONE.6","DDI.6","DDD.6","TELEFONE.6","RAMAL.6",
+                        "TIPO_TELEFONE.7","DDI.7","DDD.7","TELEFONE.7","RAMAL.7"]
 
     #Lista de larguras do layout NET COB
     lista = []
