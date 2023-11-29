@@ -59,6 +59,7 @@ st.markdown("<style>div.stButton > button:first-child { font-size: 18px; }</styl
 
 
 def carregar_bases_claro():
+
     caminho = r"R:\TI\TELEFONIA\BASES CLARO E NET ATIVA\BASES CLARO"
     arquivos = glob.glob(caminho + "/*.txt")
     #Lista de larguras do layout NET COB
@@ -139,6 +140,27 @@ def carregar_bases_claro():
 
     bases_claro['ATRASO'] = bases_claro['ATRASO'].astype('int16')
     bases_claro = bases_claro.sort_values(['ATRASO','BASE'],ascending=True)
+
+    ######## CARREGAMENTO DA BASE DE COBRANÇA PARA TRAZER A COLUNA COD_CONTA (CONTRATO)
+
+    # Defina as colunas que você deseja carregar
+    colunas_base_cobranca = ['CPF_CNPJ', 'SENHA', 'COD_CONTA']
+    # Caminho para o arquivo CSV
+    file_path = r"R:\TI\TELEFONIA\BASES CLARO E NET ATIVA\BASE DE COBRANÇA/BASE_COBRANCA_20231126_ATN_170.txt"
+
+    # Opção 1: Use chunksize para ler o arquivo em pedaços
+    chunk_size = 1000000  # ajuste o tamanho conforme necessário
+    chunks = pd.read_csv(file_path, sep="\t", dtype=str, encoding='iso-8859-1', engine='python', error_bad_lines=False, warn_bad_lines=True, skiprows=1, usecols=colunas_base_cobranca, chunksize=chunk_size)
+
+    base_de_cobranca = pd.concat(chunks, ignore_index=True)
+
+    #### Cruzando a base de cobrança e trazendo a coluna COD_CONTA , claro cobrança
+    bases_claro = pd.merge(bases_claro, base_de_cobranca, right_on=['CPF_CNPJ', 'SENHA'], left_on=['CPF','DEVEDOR'], how="left")\
+        .drop_duplicates(['CPF','DEVEDOR','ATRASO','TELEFONE','SALDO_ABERTO','BASE'])\
+        .loc[:,['CPF',	'DEVEDOR',	'NOME',	'TELEFONE',	'EMAIL',	'ATRASO',	'SALDO_ABERTO',	'BASE','COD_CONTA']]
+
+    # Renomeando a coluna COD_CONTA para CONTRATO, para futuramente poder concatenar o df de claro e gevenue
+    bases_claro.rename(columns= {'COD_CONTA':'CONTRATO'},inplace=True )
     
     return bases_claro
 
@@ -224,15 +246,15 @@ def carregar_base_gevenue():
     arquivos = glob.glob(caminho + "/*.dat")
 
     header_gevenue = ["SENHA","AGENCIA","NOME","CPF/CNPJ","TIPO_PESSOA","SCORE_DEVEDOR","DATA_AGENDA","HORA_AGENDA","VLR_NET_TV_VIRTUA","VLR_NET_FONE","VLR_CLR_MOVEL","VLR_CLR_TV",
-                  "VLR_CLR_FIXO","VLR_CLR_TVEXPURGO","VLR_CLR_OI", "VLR_TOTAL","AGING","EMAIL","CONTRATO",
-                  "TIPO_TELEFONE","DDI","DDD","TELEFONE","RAMAL",
-                  "TIPO_TELEFONE.1","DDI.1","DDD.1","TELEFONE.1","RAMAL.1",
-                      	"TIPO_TELEFONE.2","DDI.2","DDD.2","TELEFONE.2","RAMAL.2",
-                        "TIPO_TELEFONE.3","DDI.3","DDD.3","TELEFONE.3","RAMAL.3",
-                        "TIPO_TELEFONE.4","DDI.4","DDD.4","TELEFONE.4","RAMAL.4",
-                        "TIPO_TELEFONE.5","DDI.5","DDD.5","TELEFONE.5","RAMAL.5",
-                        "TIPO_TELEFONE.6","DDI.6","DDD.6","TELEFONE.6","RAMAL.6",
-                        "TIPO_TELEFONE.7","DDI.7","DDD.7","TELEFONE.7","RAMAL.7"]
+                    "VLR_CLR_FIXO","VLR_CLR_TVEXPURGO","VLR_CLR_OI", "VLR_TOTAL","AGING","EMAIL","CONTRATO",
+                    "TIPO_TELEFONE","DDI","DDD","TELEFONE","RAMAL",
+                    "TIPO_TELEFONE.1","DDI.1","DDD.1","TELEFONE.1","RAMAL.1",
+                            "TIPO_TELEFONE.2","DDI.2","DDD.2","TELEFONE.2","RAMAL.2",
+                            "TIPO_TELEFONE.3","DDI.3","DDD.3","TELEFONE.3","RAMAL.3",
+                            "TIPO_TELEFONE.4","DDI.4","DDD.4","TELEFONE.4","RAMAL.4",
+                            "TIPO_TELEFONE.5","DDI.5","DDD.5","TELEFONE.5","RAMAL.5",
+                            "TIPO_TELEFONE.6","DDI.6","DDD.6","TELEFONE.6","RAMAL.6",
+                            "TIPO_TELEFONE.7","DDI.7","DDD.7","TELEFONE.7","RAMAL.7"]
 
     #Lista de larguras do layout NET COB
     lista = []
@@ -251,7 +273,6 @@ def carregar_base_gevenue():
 
     # Criando DataFrame com concat e a lista criada a cima
     base_gevenue = pd.concat(dfList, sort=False, ignore_index=False)
-    pd.set_option("display.max_columns", None)
 
     # TRATANDO CPF E CNPJ, INCLUINDO ZEROS A ESQUERDA.
     df_cpfs_correto = base_gevenue[base_gevenue['CPF/CNPJ'].str.len()==11]
@@ -268,18 +289,18 @@ def carregar_base_gevenue():
 
 
     base_gevenue = base_gevenue.loc[:,['CPF/CNPJ','SENHA','NOME','DDD', 'TELEFONE','DDD.1', 'TELEFONE.1','DDD.2', 'TELEFONE.2','DDD.3', 'TELEFONE.3',
-                                    'DDD.4', 'TELEFONE.4','DDD.5', 'TELEFONE.5','DDD.6', 'TELEFONE.6','DDD.7', 'TELEFONE.7','EMAIL','AGING','VLR_TOTAL']]
+                                    'DDD.4', 'TELEFONE.4','DDD.5', 'TELEFONE.5','DDD.6', 'TELEFONE.6','DDD.7', 'TELEFONE.7','EMAIL','AGING','VLR_TOTAL','CONTRATO']]
 
     base_gevenue = base_gevenue.assign(OPERACAO="GEVENUE")
 
-    gevenue_1 = base_gevenue.loc[:,['CPF/CNPJ','SENHA','NOME','DDD','TELEFONE','EMAIL','AGING','VLR_TOTAL','OPERACAO']]
-    gevenue_2 = base_gevenue.loc[:,['CPF/CNPJ','SENHA','NOME','DDD.1','TELEFONE.1','EMAIL','AGING','VLR_TOTAL','OPERACAO']]
-    gevenue_3 = base_gevenue.loc[:,['CPF/CNPJ','SENHA','NOME','DDD.2','TELEFONE.2','EMAIL','AGING','VLR_TOTAL','OPERACAO']]
-    gevenue_4 = base_gevenue.loc[:,['CPF/CNPJ','SENHA','NOME','DDD.3','TELEFONE.3','EMAIL','AGING','VLR_TOTAL','OPERACAO']]
-    gevenue_5 = base_gevenue.loc[:,['CPF/CNPJ','SENHA','NOME','DDD.4','TELEFONE.4','EMAIL','AGING','VLR_TOTAL','OPERACAO']]
-    gevenue_6 = base_gevenue.loc[:,['CPF/CNPJ','SENHA','NOME','DDD.5','TELEFONE.5','EMAIL','AGING','VLR_TOTAL','OPERACAO']]
-    gevenue_7 = base_gevenue.loc[:,['CPF/CNPJ','SENHA','NOME','DDD.6','TELEFONE.6','EMAIL','AGING','VLR_TOTAL','OPERACAO']]
-    gevenue_8 = base_gevenue.loc[:,['CPF/CNPJ','SENHA','NOME','DDD.7','TELEFONE.7','EMAIL','AGING','VLR_TOTAL','OPERACAO']]
+    gevenue_1 = base_gevenue.loc[:,['CPF/CNPJ','SENHA','NOME','DDD','TELEFONE','EMAIL','AGING','VLR_TOTAL','OPERACAO','CONTRATO']]
+    gevenue_2 = base_gevenue.loc[:,['CPF/CNPJ','SENHA','NOME','DDD.1','TELEFONE.1','EMAIL','AGING','VLR_TOTAL','OPERACAO','CONTRATO']]
+    gevenue_3 = base_gevenue.loc[:,['CPF/CNPJ','SENHA','NOME','DDD.2','TELEFONE.2','EMAIL','AGING','VLR_TOTAL','OPERACAO','CONTRATO']]
+    gevenue_4 = base_gevenue.loc[:,['CPF/CNPJ','SENHA','NOME','DDD.3','TELEFONE.3','EMAIL','AGING','VLR_TOTAL','OPERACAO','CONTRATO']]
+    gevenue_5 = base_gevenue.loc[:,['CPF/CNPJ','SENHA','NOME','DDD.4','TELEFONE.4','EMAIL','AGING','VLR_TOTAL','OPERACAO','CONTRATO']]
+    gevenue_6 = base_gevenue.loc[:,['CPF/CNPJ','SENHA','NOME','DDD.5','TELEFONE.5','EMAIL','AGING','VLR_TOTAL','OPERACAO','CONTRATO']]
+    gevenue_7 = base_gevenue.loc[:,['CPF/CNPJ','SENHA','NOME','DDD.6','TELEFONE.6','EMAIL','AGING','VLR_TOTAL','OPERACAO','CONTRATO']]
+    gevenue_8 = base_gevenue.loc[:,['CPF/CNPJ','SENHA','NOME','DDD.7','TELEFONE.7','EMAIL','AGING','VLR_TOTAL','OPERACAO','CONTRATO']]
 
 
     # RENOMEANDO PRA CONCATENAR
@@ -309,12 +330,13 @@ def carregar_base_gevenue():
     base_gevenue = base_gevenue.rename(columns={'OPERACAO':'BASE'})
     base_gevenue = base_gevenue.rename(columns={'CPF/CNPJ':'CPF'})
     base_gevenue = base_gevenue.rename(columns={'SENHA':'DEVEDOR'})
-    base_gevenue = base_gevenue.loc[:,['CPF','DEVEDOR','NOME','TELEFONE','EMAIL','AGING','VLR_TOTAL','BASE']]
+    base_gevenue = base_gevenue.loc[:,['CPF','DEVEDOR','NOME','TELEFONE','EMAIL','AGING','VLR_TOTAL','BASE','CONTRATO']]
     base_gevenue = base_gevenue.rename(columns={'AGING':'ATRASO'})
     base_gevenue = base_gevenue.rename(columns={'VLR_TOTAL':'SALDO_ABERTO'})
 
     base_gevenue['ATRASO'] = base_gevenue['ATRASO'].astype('int32')
     base_gevenue = base_gevenue.sort_values(['ATRASO','BASE'],ascending=True)
+
     return base_gevenue
 
 
@@ -450,7 +472,7 @@ def entrelace_de_bases():
     ######################################################  BASE NORMALIZADA X TELEFONES HIGIENIZADOS  ######################################################
 
     df_telecobs_hugo = pd.merge(df_telecobs_hugo, telefones_higienizados, right_on=['CPF'], left_on=['CPF'], how="left")\
-    .loc[:,['CPF','DEVEDOR','NOME_x','TELEFONE','EMAIL','ATRASO','SALDO_ABERTO','BASE','TELEFONE_HIGIENIZADO']]
+    .loc[:,['CPF','DEVEDOR','NOME_x','TELEFONE','EMAIL','ATRASO','SALDO_ABERTO','BASE','CONTRATO','TELEFONE_HIGIENIZADO']]
 
     ### REMOVENDO DUPLICADOS DEPOIS DO CRUZAMENTO, PARA EVITAR NOS PROXIMOS CRUZAMENTOS TER VARIOS CPF'S IGUAIS DESNCESSARIAMENTE.
     df_telecobs_hugo = df_telecobs_hugo.drop_duplicates(['CPF','DEVEDOR', 'NOME_x', 'TELEFONE', 'EMAIL','ATRASO', 'BASE', 'TELEFONE_HIGIENIZADO'])
@@ -479,10 +501,11 @@ def entrelace_de_bases():
     emails_higienizados = emails_higienizados.rename(columns={'EMAIL':'EMAIL_HIGIENIZADO'})
 
 
+
     ######################################################  BASE NORMALIZADA X EMAILS HIGIENIZADOS  ######################################################
 
     df_telecobs_hugo = pd.merge(df_telecobs_hugo, emails_higienizados, right_on=['CPF'], left_on=['CPF'], how="left")\
-    .loc[:,['CPF','DEVEDOR','NOME_x','TELEFONE','EMAIL','ATRASO','SALDO_ABERTO','BASE','TELEFONE_HIGIENIZADO','EMAIL_HIGIENIZADO']]
+    .loc[:,['CPF','DEVEDOR','NOME_x','TELEFONE','EMAIL','ATRASO','SALDO_ABERTO','BASE','CONTRATO','TELEFONE_HIGIENIZADO','EMAIL_HIGIENIZADO']]
 
     ### REMOVENDO DUPLICADOS DEPOIS DO CRUZAMENTO, PARA EVITAR NOS PROXIMOS CRUZAMENTOS TER VARIOS CPF'S IGUAIS DESNCESSARIAMENTE.
     df_telecobs_hugo = df_telecobs_hugo.drop_duplicates(['CPF','DEVEDOR', 'NOME_x', 'TELEFONE', 'EMAIL','ATRASO', 'BASE', 'TELEFONE_HIGIENIZADO', 'EMAIL_HIGIENIZADO'])
@@ -508,10 +531,11 @@ def entrelace_de_bases():
     telefones_validados = pd.concat(dfList, sort=False, ignore_index=False)
 
 
+
     ######################################################  BASE NORMALIZADA X TELEFONES INTERSIC E GEVENUE  ######################################################
 
     df_telecobs_hugo = pd.merge(df_telecobs_hugo, telefones_validados, right_on=['Numero'], left_on=['TELEFONE'], how="left")\
-    .loc[:,['CPF','DEVEDOR','NOME_x','TELEFONE','Usa whatsapp','data de envio','EMAIL','ATRASO','SALDO_ABERTO','BASE','TELEFONE_HIGIENIZADO','EMAIL_HIGIENIZADO']]
+    .loc[:,['CPF','DEVEDOR','NOME_x','TELEFONE','Usa whatsapp','data de envio','EMAIL','ATRASO','SALDO_ABERTO','BASE','CONTRATO','TELEFONE_HIGIENIZADO','EMAIL_HIGIENIZADO']]
 
     ############ APÓS O CRUZAMENTO, MARCAMOS COMO "NAO_VALIDADO" A BASE QUE NÃO FOI ENCONTRADA NO BANCO DE VALIDOS OU NAO.
     ########## RENOMEANDO A COLUNA SE USA WHATSS PARA IDENTIFICAR QUE A VALIDAÇÃO É REFERENTE A BASE DE CONTRATANTE / DATA DA VALIDACAO TAMBEM
@@ -522,7 +546,7 @@ def entrelace_de_bases():
     ######################################################  BASE NORMALIZADA X TELEFONES HIGIENIZADOS  ######################################################
 
     df_telecobs_hugo = pd.merge(df_telecobs_hugo, telefones_validados, right_on=['Numero'], left_on=['TELEFONE_HIGIENIZADO'], how="left")\
-    .loc[:,['CPF','DEVEDOR','NOME_x','TELEFONE','BASE_CONTRATANTE_VALIDADOS','DATA_VALIDACAO_CONTRATANTE','EMAIL','ATRASO','SALDO_ABERTO','BASE',
+    .loc[:,['CPF','DEVEDOR','NOME_x','TELEFONE','BASE_CONTRATANTE_VALIDADOS','DATA_VALIDACAO_CONTRATANTE','EMAIL','ATRASO','SALDO_ABERTO','BASE','CONTRATO',
             'TELEFONE_HIGIENIZADO','Usa whatsapp','data de envio','EMAIL_HIGIENIZADO']]
 
     ############ APÓS O CRUZAMENTO, MARCAMOS COMO "NAO_VALIDADO" A BASE QUE NÃO FOI ENCONTRADA NO BANCO DE VALIDOS OU NAO.
@@ -534,9 +558,8 @@ def entrelace_de_bases():
 
 
 
-
     ### REMOVENDO DUPLICADOS DEPOIS DO CRUZAMENTO, PARA EVITAR NOS PROXIMOS CRUZAMENTOS TER VARIOS CPF'S IGUAIS DESNCESSARIAMENTE.
-    df_telecobs_hugo = df_telecobs_hugo.drop_duplicates(['CPF','DEVEDOR', 'NOME_x', 'TELEFONE', 'EMAIL','ATRASO', 'BASE', 'TELEFONE_HIGIENIZADO','EMAIL_HIGIENIZADO'])
+    df_telecobs_hugo = df_telecobs_hugo.drop_duplicates(['CPF','DEVEDOR', 'NOME_x', 'TELEFONE', 'EMAIL','ATRASO', 'BASE','CONTRATO', 'TELEFONE_HIGIENIZADO','EMAIL_HIGIENIZADO'])
     return df_telecobs_hugo
 
 
