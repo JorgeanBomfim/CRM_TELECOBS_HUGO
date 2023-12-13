@@ -146,7 +146,7 @@ def carregar_bases_claro():
     # Defina as colunas que você deseja carregar
     colunas_base_cobranca = ['CPF_CNPJ', 'SENHA', 'COD_CONTA']
     # Caminho para o arquivo CSV
-    file_path = r"R:\TI\TELEFONIA\BASES CLARO E NET ATIVA\BASE DE COBRANÇA/BASE_COBRANCA_20231126_ATN_170.txt"
+    file_path = r"R:\TI\TELEFONIA\BASES CLARO E NET ATIVA\BASE DE COBRANÇA/BASE_COBRANCA_20231203_ATN_171.txt"
 
     # Opção 1: Use chunksize para ler o arquivo em pedaços
     chunk_size = 1000000  # ajuste o tamanho conforme necessário
