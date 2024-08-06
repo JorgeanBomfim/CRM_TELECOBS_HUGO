@@ -1,0 +1,16 @@
+→ Link de acesso ao portal: https://sd.mutantbr.com/servicedesk/customer/user/login?destination=portals&logout=true
+→ Login: diogenes@atnctc.com.br
+→ Senha: 123Trocar@@
+ 
+
+
+
+https://sd.mutantbr.com/servicedesk/customer/user/login?destination=portals&logout=true
+
+
+
+
+Prezados(as), boa noite!
+ 
+Informamos que no caso da plataforma habitual de abertura de chamados da Mutant (JIRA) estiver fora do ar, formalizar o chamado com as evidências para o e-mail abaixo:
+network@mutant.com.br

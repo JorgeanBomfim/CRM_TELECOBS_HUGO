@@ -1,0 +1,4 @@
+IP: 10.35.14.229
+PORTA: 22
+USUARIO: claro_gravacao
+SENHA: Claro@AtN%2022

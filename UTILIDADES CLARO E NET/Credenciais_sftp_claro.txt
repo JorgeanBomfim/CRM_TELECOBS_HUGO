@@ -1,0 +1,14 @@
+Credenciais SFTP CLARO 
+
+USUARIO: claro_gravacao
+SENHA: Claro@AtN%2022
+
+
+CAMINHO DA PASTA : 
+
+\\10.0.6.1\gevenui
+
+USUÁRIO DA PASTA GEVENUI: 
+
+Usuário : gevenui 
+Senha: G3venui@
